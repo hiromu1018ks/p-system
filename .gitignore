@@ -35,3 +35,6 @@ backend/test_zaisan.db
 
 # Claude Code
 .claude/
+
+# Alembic auto-generated
+backend/alembic/README
