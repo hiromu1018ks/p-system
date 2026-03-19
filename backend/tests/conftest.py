@@ -24,3 +24,17 @@ def db_session():
     finally:
         session.close()
         Base.metadata.drop_all(bind=engine)
+
+
+@pytest.fixture
+def client(db_session):
+    from main import app
+    from database import get_db
+
+    app.dependency_overrides[get_db] = lambda: db_session
+    from fastapi.testclient import TestClient
+
+    with TestClient(app) as c:
+        yield c
+
+    app.dependency_overrides.clear()
