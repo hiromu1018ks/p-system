@@ -5,6 +5,7 @@ from fastapi.exceptions import RequestValidationError
 
 from routers.auth import router as auth_router
 from routers.properties import router as properties_router
+from routers.files import router as files_router
 from auth import get_current_user, require_role
 from models.user import User
 
@@ -26,6 +27,7 @@ def admin_only_endpoint(current_user: User = Depends(get_current_user)):
 
 app.include_router(auth_router)
 app.include_router(properties_router)
+app.include_router(files_router)
 
 
 @app.exception_handler(RequestValidationError)
