@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+backend/venv/
+
+# Python cache
+backend/__pycache__/
+backend/**/__pycache__/
+
+# Database
+backend/zaisan.db
+backend/zaisan.db-wal
+backend/zaisan.db-shm
+
+# Environment files
+backend/.env
+
+# Uploads and generated files
+backend/uploads/*
+backend/generated_pdfs/*
+backend/backups/*
