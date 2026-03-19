@@ -2,6 +2,8 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Base
+from models.user import User
+from auth import hash_password, create_access_token
 
 
 SQLALCHEMY_TEST_URL = "sqlite:///./test_zaisan.db"
@@ -38,3 +40,23 @@ def client(db_session):
         yield c
 
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def auth_client(client, db_session):
+    """認証済みクライアント（staff権限）を提供する"""
+    user = User(
+        username="tanaka",
+        hashed_password=hash_password("Password1"),
+        display_name="田中太郎",
+        role="staff",
+    )
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+
+    token = create_access_token(user.id, user.username, user.role)
+    client.headers["Authorization"] = f"Bearer {token}"
+    client.user = user
+
+    yield client
