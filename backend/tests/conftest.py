@@ -7,6 +7,8 @@ from models.audit_log import AuditLog  # ensure table is created
 from models.property_history import PropertyHistory  # ensure table is created
 from models.property import Property  # ensure table is created
 from models.file import File  # ensure table is created
+from models.permission import Permission  # ensure table is created
+from models.permission_history import PermissionHistory  # ensure table is created
 from auth import hash_password, create_access_token
 
 
