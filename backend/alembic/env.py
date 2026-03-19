@@ -8,6 +8,9 @@ from models import Base
 import models.user  # noqa: F401 - モデルをBase.metadataに登録するため
 import models.jwt_blacklist  # noqa: F401
 import models.audit_log  # noqa: F401
+import models.property  # noqa: F401
+import models.property_history  # noqa: F401
+import models.file  # noqa: F401
 
 config = context.config
 
