@@ -7,6 +7,7 @@ from database import get_db
 from models.user import User
 from schemas.auth import LoginRequest, TokenResponse, UserInfo
 from auth import verify_password, create_access_token, decode_access_token, get_current_user
+from audit import log_audit
 from models.jwt_blacklist import JWTBlacklist
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -39,6 +40,15 @@ def login(request: LoginRequest, req: Request, db: Session = Depends(get_db)):
 
     user.failed_login_count = 0
     db.commit()
+
+    log_audit(
+        db=db,
+        user_id=user.id,
+        action="LOGIN",
+        target_table="m_user",
+        target_id=user.id,
+        ip_address=req.client.host if req.client else None,
+    )
 
     token = create_access_token(user.id, user.username, user.role)
 
