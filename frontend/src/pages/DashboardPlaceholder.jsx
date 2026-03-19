@@ -25,6 +25,7 @@ export default function DashboardPlaceholder() {
         <h2>ダッシュボード（開発中）</h2>
         <p>認証・共通基盤の動作確認用ページです。</p>
         <p>Plan 2 以降でダッシュボードを実装します。</p>
+        <p><a href="/properties" style={{ color: '#2b6cb0' }}>財産台帳を開く</a></p>
       </main>
     </div>
   )

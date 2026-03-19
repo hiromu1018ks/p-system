@@ -62,3 +62,21 @@ button:disabled {
 main {
   padding: 24px;
 }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  font-weight: 600;
+  color: #555;
+  font-size: 13px;
+}
+
+select {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
