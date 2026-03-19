@@ -100,3 +100,23 @@ class TestLogin:
 
         user = db_session.query(User).filter_by(username="tanaka").first()
         assert user.failed_login_count == 0
+
+
+class TestLogout:
+    def test_logout_success(self, client, db_session):
+        _create_test_user(db_session)
+
+        # ログイン
+        login_resp = client.post("/api/auth/login", json={
+            "username": "tanaka",
+            "password": "Password1",
+        })
+        token = login_resp.json()["data"]["access_token"]
+
+        # ログアウト
+        logout_resp = client.post("/api/auth/logout", json={"token": token})
+        assert logout_resp.status_code == 200
+
+    def test_logout_invalid_token(self, client):
+        resp = client.post("/api/auth/logout", json={"token": "invalid"})
+        assert resp.status_code == 401
