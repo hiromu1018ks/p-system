@@ -25,3 +25,13 @@ backend/.env
 backend/uploads/*
 backend/generated_pdfs/*
 backend/backups/*
+
+# Node.js
+frontend/node_modules/
+frontend/dist/
+
+# Test database
+backend/test_zaisan.db
+
+# Claude Code
+.claude/
