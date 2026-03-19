@@ -11,6 +11,10 @@ import models.audit_log  # noqa: F401
 import models.property  # noqa: F401
 import models.property_history  # noqa: F401
 import models.file  # noqa: F401
+import models.permission  # noqa: F401
+import models.permission_history  # noqa: F401
+import models.fee_detail  # noqa: F401
+import models.unit_price  # noqa: F401
 
 config = context.config
 
