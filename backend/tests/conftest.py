@@ -3,6 +3,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Base
 from models.user import User
+from models.audit_log import AuditLog  # ensure table is created
+from models.property_history import PropertyHistory  # ensure table is created
 from auth import hash_password, create_access_token
 
 

@@ -209,4 +209,4 @@ def get_property_history(db: Session, property_id: int) -> list[PropertyHistory]
     """財産の変更履歴を取得する"""
     return db.query(PropertyHistory).filter(
         PropertyHistory.target_id == property_id
-    ).order_by(PropertyHistory.changed_at.desc()).all()
+    ).order_by(PropertyHistory.id.desc()).all()
