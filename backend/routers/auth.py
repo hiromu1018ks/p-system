@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models.user import User
 from schemas.auth import LoginRequest, TokenResponse, UserInfo
-from auth import verify_password, create_access_token, decode_access_token
+from auth import verify_password, create_access_token, decode_access_token, get_current_user
 from models.jwt_blacklist import JWTBlacklist
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -80,3 +80,16 @@ def logout(request_body: dict, db: Session = Depends(get_db)):
     db.commit()
 
     return {"data": None, "message": "ログアウトしました"}
+
+
+@router.get("/me")
+def get_me(current_user: User = Depends(get_current_user)):
+    return {
+        "data": {
+            "id": current_user.id,
+            "username": current_user.username,
+            "display_name": current_user.display_name,
+            "role": current_user.role,
+        },
+        "message": "OK",
+    }

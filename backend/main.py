@@ -1,8 +1,10 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from routers.auth import router as auth_router
+from auth import get_current_user, require_role
+from models.user import User
 
 app = FastAPI(title="自治体財産管理システム", version="0.1.0")
 
@@ -12,6 +14,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/api/admin-only")
+def admin_only_endpoint(current_user: User = Depends(get_current_user)):
+    require_role(current_user, ["admin"])
+    return {"data": {"message": "admin access"}}
+
 
 app.include_router(auth_router)
 

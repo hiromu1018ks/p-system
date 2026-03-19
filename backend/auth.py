@@ -2,10 +2,16 @@ import re
 import secrets
 from datetime import datetime, timedelta, timezone
 
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+from sqlalchemy.orm import Session
 
 from config import settings
+from database import get_db
+from models.user import User
+from models.jwt_blacklist import JWTBlacklist
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -50,3 +56,55 @@ def decode_access_token(token: str) -> dict:
         return payload
     except JWTError:
         raise ValueError("Invalid or expired token")
+
+
+security = HTTPBearer()
+
+
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db),
+) -> User:
+    """JWTトークンから現在のユーザーを取得する"""
+    token = credentials.credentials
+
+    try:
+        payload = decode_access_token(token)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"code": "INVALID_TOKEN", "message": "トークンが無効です"},
+        )
+
+    jti = payload.get("jti")
+    blacklisted = db.query(JWTBlacklist).filter(
+        JWTBlacklist.token_jti == jti
+    ).first()
+    if blacklisted:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"code": "TOKEN_REVOKED", "message": "トークンは失効しています"},
+        )
+
+    user_id = int(payload.get("sub"))
+    user = db.query(User).filter(
+        User.id == user_id,
+        User.is_deleted == False,
+    ).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"code": "USER_NOT_FOUND", "message": "ユーザーが見つかりません"},
+        )
+
+    return user
+
+
+def require_role(user: User, allowed_roles: list[str]) -> None:
+    """ユーザーのロールが許可リストに含まれているか検証する"""
+    if user.role not in allowed_roles:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "FORBIDDEN", "message": "権限がありません"},
+        )
