@@ -1,6 +1,9 @@
 import pytest
+from datetime import datetime
 from sqlalchemy import text
 from models.user import User
+from models.jwt_blacklist import JWTBlacklist
+from models.audit_log import AuditLog
 
 
 def test_user_table_exists(db_session):
@@ -52,3 +55,55 @@ def test_user_default_values(db_session):
     assert user.is_locked is False
     assert user.is_deleted is False
     assert user.failed_login_count == 0
+
+
+def test_jwt_blacklist_table_exists(db_session):
+    result = db_session.execute(text("PRAGMA table_info(t_jwt_blacklist)"))
+    columns = {row[1] for row in result}
+    assert "id" in columns
+    assert "token_jti" in columns
+    assert "expires_at" in columns
+
+
+def test_create_jwt_blacklist(db_session):
+    entry = JWTBlacklist(
+        token_jti="test-jti-123",
+        expires_at=datetime(2026, 12, 31, 23, 59, 59),
+    )
+    db_session.add(entry)
+    db_session.commit()
+    db_session.refresh(entry)
+
+    assert entry.id is not None
+    assert entry.token_jti == "test-jti-123"
+
+
+def test_audit_log_table_exists(db_session):
+    result = db_session.execute(text("PRAGMA table_info(t_audit_log)"))
+    columns = {row[1] for row in result}
+    assert "id" in columns
+    assert "user_id" in columns
+    assert "action" in columns
+    assert "target_table" in columns
+    assert "changed_fields" in columns
+    assert "before_value" in columns
+    assert "after_value" in columns
+
+
+def test_create_audit_log(db_session):
+    log = AuditLog(
+        user_id=1,
+        action="CREATE",
+        target_table="m_user",
+        target_id=1,
+        changed_fields='["username", "display_name"]',
+        before_value="null",
+        after_value='{"username": "tanaka"}',
+        ip_address="127.0.0.1",
+    )
+    db_session.add(log)
+    db_session.commit()
+    db_session.refresh(log)
+
+    assert log.id is not None
+    assert log.action == "CREATE"
