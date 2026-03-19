@@ -68,3 +68,23 @@ def auth_client(client, db_session):
     client.user = user
 
     yield client
+
+
+@pytest.fixture
+def admin_client(client, db_session):
+    """認証済みクライアント（admin権限）を提供する"""
+    user = User(
+        username="admin",
+        hashed_password=hash_password("Admin123"),
+        display_name="管理者",
+        role="admin",
+    )
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+
+    token = create_access_token(user.id, user.username, user.role)
+    client.headers["Authorization"] = f"Bearer {token}"
+    client.user = user
+
+    yield client
