@@ -8,6 +8,9 @@ import PropertyForm from './pages/PropertyForm'
 import PermissionList from './pages/PermissionList'
 import PermissionDetail from './pages/PermissionDetail'
 import PermissionForm from './pages/PermissionForm'
+import LeaseList from './pages/LeaseList'
+import LeaseDetail from './pages/LeaseDetail'
+import LeaseForm from './pages/LeaseForm'
 import ProtectedRoute from './components/ProtectedRoute'
 import './App.css'
 
@@ -72,6 +75,22 @@ function App() {
           <Route
             path="/permissions/:id/edit"
             element={<ProtectedRoute><PermissionForm /></ProtectedRoute>}
+          />
+          <Route
+            path="/leases"
+            element={<ProtectedRoute><LeaseList /></ProtectedRoute>}
+          />
+          <Route
+            path="/leases/:id"
+            element={<ProtectedRoute><LeaseDetail /></ProtectedRoute>}
+          />
+          <Route
+            path="/leases/new"
+            element={<ProtectedRoute><LeaseForm /></ProtectedRoute>}
+          />
+          <Route
+            path="/leases/:id/edit"
+            element={<ProtectedRoute><LeaseForm /></ProtectedRoute>}
           />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>

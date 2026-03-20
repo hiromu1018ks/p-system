@@ -27,6 +27,7 @@ export default function DashboardPlaceholder() {
         <p>Plan 2 以降でダッシュボードを実装します。</p>
         <p><a href="/properties" style={{ color: '#2b6cb0' }}>財産台帳を開く</a></p>
         <p><a href="/permissions" style={{ color: '#2b6cb0' }}>使用許可案件を開く</a></p>
+        <p><a href="/leases" style={{ color: '#2b6cb0' }}>貸付案件を開く</a></p>
       </main>
     </div>
   )
