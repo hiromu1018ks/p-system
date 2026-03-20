@@ -22,9 +22,29 @@ const PERMISSION_STATUS_COLORS = {
   cancelled: '#fed7d7',
 }
 
-export default function StatusBadge({ status }) {
-  const label = PERMISSION_STATUS_LABELS[status] || status
-  const bg = PERMISSION_STATUS_COLORS[status] || '#e2e8f0'
+const LEASE_STATUS_LABELS = {
+  draft: '下書き',
+  negotiating: '協議中',
+  pending_approval: '決裁待ち',
+  active: '契約中',
+  expired: '期間終了',
+  terminated: '解約',
+}
+
+const LEASE_STATUS_COLORS = {
+  draft: '#e2e8f0',
+  negotiating: '#fefcbf',
+  pending_approval: '#fefcbf',
+  active: '#c6f6d5',
+  expired: '#e2e8f0',
+  terminated: '#fed7d7',
+}
+
+export default function StatusBadge({ status, caseType }) {
+  const labels = caseType === 'lease' ? LEASE_STATUS_LABELS : PERMISSION_STATUS_LABELS
+  const colors = caseType === 'lease' ? LEASE_STATUS_COLORS : PERMISSION_STATUS_COLORS
+  const label = labels[status] || status
+  const bg = colors[status] || '#e2e8f0'
 
   return (
     <span style={{

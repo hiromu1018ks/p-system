@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getPropertyHistory } from '../api/properties'
+import { getPermissionHistory } from '../api/permissions'
+import { getLeaseHistory } from '../api/leases'
 
 const OPERATION_LABELS = {
   CREATE: '新規登録',
@@ -9,17 +11,23 @@ const OPERATION_LABELS = {
   STATUS_CHANGE: 'ステータス変更',
 }
 
-export default function HistoryList({ propertyId }) {
+async function fetchHistory(caseType, caseId) {
+  if (caseType === 'lease') return getLeaseHistory(caseId)
+  if (caseType === 'permission') return getPermissionHistory(caseId)
+  return getPropertyHistory(caseId)
+}
+
+export default function HistoryList({ caseType = 'property', caseId }) {
   const [history, setHistory] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!propertyId) return
-    getPropertyHistory(propertyId)
+    if (!caseId) return
+    fetchHistory(caseType, caseId)
       .then(setHistory)
       .catch(() => setHistory([]))
       .finally(() => setLoading(false))
-  }, [propertyId])
+  }, [caseType, caseId])
 
   if (loading) return <p>読み込み中...</p>
   if (!history.length) return <p>変更履歴はありません</p>

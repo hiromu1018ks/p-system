@@ -125,7 +125,7 @@ export default function PropertyDetail() {
       )}
 
       {activeTab === 'history' && (
-        <HistoryList propertyId={parseInt(id)} />
+        <HistoryList caseType="property" caseId={parseInt(id)} />
       )}
     </div>
   )

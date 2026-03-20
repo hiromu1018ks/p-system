@@ -186,7 +186,7 @@ export default function PermissionDetail() {
       )}
 
       {activeTab === 'history' && (
-        <HistoryList propertyId={parseInt(id)} />
+        <HistoryList caseType="permission" caseId={parseInt(id)} />
       )}
     </div>
   )

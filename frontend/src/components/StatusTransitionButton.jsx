@@ -22,8 +22,21 @@ const PERMISSION_TRANSITIONS = {
   rejected: [{ to: 'submitted', label: '再申請' }],
 }
 
-export default function StatusTransitionButton({ currentStatus, userRole, onTransition }) {
-  const transitions = PERMISSION_TRANSITIONS[currentStatus] || []
+const LEASE_TRANSITIONS = {
+  draft: [{ to: 'negotiating', label: '協議開始' }],
+  negotiating: [{ to: 'pending_approval', label: '決裁上申' }],
+  pending_approval: [
+    { to: 'negotiating', label: '差戻し', adminOnly: true },
+    { to: 'active', label: '決裁完了', adminOnly: true },
+  ],
+  active: [
+    { to: 'expired', label: '期間満了', adminOnly: true },
+    { to: 'terminated', label: '解約', adminOnly: true },
+  ],
+}
+
+export default function StatusTransitionButton({ currentStatus, userRole, onTransition, caseType }) {
+  const transitions = (caseType === 'lease' ? LEASE_TRANSITIONS : PERMISSION_TRANSITIONS)[currentStatus] || []
 
   return (
     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -57,8 +70,8 @@ export default function StatusTransitionButton({ currentStatus, userRole, onTran
               border: '1px solid #ccc',
               borderRadius: 4,
               cursor: 'pointer',
-              background: to === 'rejected' || to === 'cancelled' ? '#fff5f5' : '#ebf8ff',
-              color: to === 'rejected' || to === 'cancelled' ? '#c53030' : '#2b6cb0',
+              background: to === 'rejected' || to === 'cancelled' || to === 'terminated' ? '#fff5f5' : '#ebf8ff',
+              color: to === 'rejected' || to === 'cancelled' || to === 'terminated' ? '#c53030' : '#2b6cb0',
             }}
           >
             {label}

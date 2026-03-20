@@ -6,12 +6,13 @@ function formatYen(amount) {
   return amount.toLocaleString() + ' 円'
 }
 
-export default function FeeCalculator({ caseId, caseType, permission, onFeeCalculated }) {
+export default function FeeCalculator({ caseId, caseType, permission, lease, onFeeCalculated }) {
+  const caseData = caseType === 'lease' ? lease : permission
   const [form, setForm] = useState({
     unit_price: '',
-    area_sqm: permission?.usage_area_sqm || '',
-    start_date: permission?.start_date || '',
-    end_date: permission?.end_date || '',
+    area_sqm: caseData?.usage_area_sqm || caseData?.leased_area || '',
+    start_date: caseData?.start_date || '',
+    end_date: caseData?.end_date || '',
     discount_rate: 0,
     tax_rate: 0.10,
     discount_reason: '',
@@ -50,9 +51,11 @@ export default function FeeCalculator({ caseId, caseType, permission, onFeeCalcu
     }
   }
 
+  const feeLabel = caseType === 'lease' ? '賃料' : '使用料'
+
   return (
     <div>
-      <h4 style={{ marginBottom: 8 }}>使用料計算</h4>
+      <h4 style={{ marginBottom: 8 }}>{feeLabel}計算</h4>
       <form onSubmit={handleCalculate} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'flex-end' }}>
         <div>
           <label style={{ fontSize: 12 }}>単価（円/㎡/月）</label>
@@ -97,7 +100,7 @@ export default function FeeCalculator({ caseId, caseType, permission, onFeeCalcu
 
       {result && (
         <div style={{ marginTop: 12, padding: 12, background: '#f7fafc', borderRadius: 4, fontSize: 13, fontFamily: 'monospace' }}>
-          <div>【使用料 計算内訳】</div>
+          <div>【{feeLabel} 計算内訳】</div>
           <div>  単価         : {formatYen(result.unit_price)}/{result.area_sqm} ㎡/月</div>
           <div>  面積         :  {result.area_sqm} ㎡</div>
           <div>  使用期間     :  {result.months}ヶ月 + {result.fraction_days}日（{result.start_date} 〜 {result.end_date}）</div>
