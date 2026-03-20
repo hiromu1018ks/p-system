@@ -54,41 +54,50 @@ def client(db_session):
     app.dependency_overrides.clear()
 
 
+def _make_authenticated_client(db_session, username, password, display_name, role):
+    """認証済みクライアントを作成するヘルパー"""
+    from main import app
+    from database import get_db
+    from fastapi.testclient import TestClient
+
+    user = User(
+        username=username,
+        hashed_password=hash_password(password),
+        display_name=display_name,
+        role=role,
+    )
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+
+    token = create_access_token(user.id, user.username, user.role)
+
+    app.dependency_overrides[get_db] = lambda: db_session
+    c = TestClient(app)
+    c.headers["Authorization"] = f"Bearer {token}"
+    c.user = user
+    return c
+
+
 @pytest.fixture
-def auth_client(client, db_session):
+def auth_client(db_session):
     """認証済みクライアント（staff権限）を提供する"""
-    user = User(
-        username="tanaka",
-        hashed_password=hash_password("Password1"),
-        display_name="田中太郎",
-        role="staff",
+    yield _make_authenticated_client(
+        db_session, "tanaka", "Password1", "田中太郎", "staff"
     )
-    db_session.add(user)
-    db_session.commit()
-    db_session.refresh(user)
-
-    token = create_access_token(user.id, user.username, user.role)
-    client.headers["Authorization"] = f"Bearer {token}"
-    client.user = user
-
-    yield client
 
 
 @pytest.fixture
-def admin_client(client, db_session):
-    """認証済みクライアント（admin権限）を提供する"""
-    user = User(
-        username="admin",
-        hashed_password=hash_password("Admin123"),
-        display_name="管理者",
-        role="admin",
+def viewer_client(db_session):
+    """認証済みクライアント（viewer権限）を提供する"""
+    yield _make_authenticated_client(
+        db_session, "sato", "Sato12345", "佐藤花子", "viewer"
     )
-    db_session.add(user)
-    db_session.commit()
-    db_session.refresh(user)
 
-    token = create_access_token(user.id, user.username, user.role)
-    client.headers["Authorization"] = f"Bearer {token}"
-    client.user = user
 
-    yield client
+@pytest.fixture
+def admin_client(db_session):
+    """認証済みクライアント（admin権限）を提供する"""
+    yield _make_authenticated_client(
+        db_session, "admin", "Admin123", "管理者", "admin"
+    )
