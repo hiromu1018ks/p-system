@@ -8,6 +8,7 @@ import FeeCalculator from '../components/FeeCalculator'
 import HistoryList from '../components/HistoryList'
 import FileList from '../components/FileList'
 import { generateLandLeasePdf, generateBuildingLeasePdf, generateRenewalPdf, downloadPdf, getDocumentHistory } from '../api/pdf'
+import { useAuth } from '../contexts/AuthContext'
 
 const SUB_TYPE_LABELS = { land: '土地', building: '建物' }
 const PAYMENT_LABELS = { monthly: '月払', semiannual: '半期払', annual: '年払' }
@@ -21,6 +22,7 @@ export default function LeaseDetail() {
   const [activeTab, setActiveTab] = useState('basic')
   const [statusDialog, setStatusDialog] = useState(null)
   const [statusReason, setStatusReason] = useState('')
+  const { user } = useAuth()
 
   useEffect(() => { load() }, [id])
 
@@ -81,7 +83,7 @@ export default function LeaseDetail() {
   if (loading) return <div>読み込み中...</div>
   if (!lease) return <div>案件が見つかりません</div>
 
-  const userRole = JSON.parse(sessionStorage.getItem('user') || '{}').role || 'staff'
+  const userRole = user?.role || 'staff'
 
   const tabs = [
     { key: 'basic', label: '基本情報' },

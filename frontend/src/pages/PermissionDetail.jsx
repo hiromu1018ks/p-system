@@ -8,6 +8,7 @@ import FeeCalculator from '../components/FeeCalculator'
 import HistoryList from '../components/HistoryList'
 import FileList from '../components/FileList'
 import { generatePermissionPdf, generateRenewalPdf, downloadPdf, getDocumentHistory } from '../api/pdf'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function PermissionDetail() {
   const { id } = useParams()
@@ -19,6 +20,7 @@ export default function PermissionDetail() {
   const [activeTab, setActiveTab] = useState('basic')
   const [statusDialog, setStatusDialog] = useState(null) // { newStatus }
   const [statusReason, setStatusReason] = useState('')
+  const { user } = useAuth()
 
   useEffect(() => {
     load()
@@ -85,7 +87,7 @@ export default function PermissionDetail() {
   if (loading) return <div>読み込み中...</div>
   if (!permission) return <div>案件が見つかりません</div>
 
-  const userRole = JSON.parse(sessionStorage.getItem('user') || '{}').role || 'staff'
+  const userRole = user?.role || 'staff'
 
   const tabs = [
     { key: 'basic', label: '基本情報' },
