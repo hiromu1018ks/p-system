@@ -1,7 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
-import { logout } from '../api/auth'
 import { getDashboardSummary } from '../api/dashboard'
 import StatusChart from '../components/StatusChart'
 import ExpiryAlerts from '../components/ExpiryAlerts'
@@ -22,25 +19,7 @@ function KpiCard({ label, value, color, subtext }) {
   )
 }
 
-function QuickLink({ label, sublabel, to }) {
-  const navigate = useNavigate()
-  return (
-    <div
-      onClick={() => navigate(to)}
-      style={{
-        flex: 1, background: '#2b6cb0', color: 'white', borderRadius: 6,
-        padding: 16, textAlign: 'center', cursor: 'pointer',
-      }}
-    >
-      <div style={{ fontSize: 13, fontWeight: 600 }}>{label}</div>
-      <div style={{ fontSize: 10, opacity: 0.8, marginTop: 2 }}>{sublabel}</div>
-    </div>
-  )
-}
-
 export default function Dashboard() {
-  const { user, setUser } = useAuth()
-  const navigate = useNavigate()
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -51,23 +30,8 @@ export default function Dashboard() {
       .finally(() => setLoading(false))
   }, [])
 
-  const handleLogout = async () => {
-    await logout()
-    setUser(null)
-    navigate('/login')
-  }
-
   return (
     <div>
-      <header>
-        <h1>自治体財産管理システム</h1>
-        <div>
-          <span>{user?.display_name} ({user?.role})</span>
-          <button onClick={handleLogout}>ログアウト</button>
-        </div>
-      </header>
-
-      <main>
         {/* KPI Cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 20 }}>
           <KpiCard
@@ -96,8 +60,8 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* FY Total + Quick Links */}
-        <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: 12, marginBottom: 20 }}>
+        {/* FY Total */}
+        <div style={{ display: 'grid', gridTemplateColumns: '200px', gap: 12, marginBottom: 20 }}>
           <div style={{
             background: 'white', border: '1px solid #e2e8f0', borderRadius: 6,
             padding: 16, textAlign: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
@@ -108,11 +72,6 @@ export default function Dashboard() {
             <div style={{ fontSize: 32, fontWeight: 700, color: '#2d3748' }}>
               {loading ? '...' : (data?.fy_total ?? 0)}
             </div>
-          </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <QuickLink label="財産台帳" sublabel="管理画面へ" to="/properties" />
-            <QuickLink label="使用許可" sublabel="案件一覧へ" to="/permissions" />
-            <QuickLink label="普通財産貸付" sublabel="案件一覧へ" to="/leases" />
           </div>
         </div>
 
@@ -138,7 +97,6 @@ export default function Dashboard() {
         ) : data ? (
           <RecentLogs logs={data.recent_logs} />
         ) : null}
-      </main>
     </div>
   )
 }

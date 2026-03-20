@@ -12,6 +12,7 @@ import LeaseList from './pages/LeaseList'
 import LeaseDetail from './pages/LeaseDetail'
 import LeaseForm from './pages/LeaseForm'
 import ProtectedRoute from './components/ProtectedRoute'
+import Layout from './components/Layout'
 import './App.css'
 
 function App() {
@@ -20,78 +21,21 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/properties"
-            element={
-              <ProtectedRoute>
-                <PropertyList />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/properties/:id"
-            element={
-              <ProtectedRoute>
-                <PropertyDetail />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/properties/new"
-            element={
-              <ProtectedRoute>
-                <PropertyForm />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/properties/:id/edit"
-            element={
-              <ProtectedRoute>
-                <PropertyForm />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/permissions"
-            element={<ProtectedRoute><PermissionList /></ProtectedRoute>}
-          />
-          <Route
-            path="/permissions/:id"
-            element={<ProtectedRoute><PermissionDetail /></ProtectedRoute>}
-          />
-          <Route
-            path="/permissions/new"
-            element={<ProtectedRoute><PermissionForm /></ProtectedRoute>}
-          />
-          <Route
-            path="/permissions/:id/edit"
-            element={<ProtectedRoute><PermissionForm /></ProtectedRoute>}
-          />
-          <Route
-            path="/leases"
-            element={<ProtectedRoute><LeaseList /></ProtectedRoute>}
-          />
-          <Route
-            path="/leases/:id"
-            element={<ProtectedRoute><LeaseDetail /></ProtectedRoute>}
-          />
-          <Route
-            path="/leases/new"
-            element={<ProtectedRoute><LeaseForm /></ProtectedRoute>}
-          />
-          <Route
-            path="/leases/:id/edit"
-            element={<ProtectedRoute><LeaseForm /></ProtectedRoute>}
-          />
+          <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/properties" element={<PropertyList />} />
+            <Route path="/properties/:id" element={<PropertyDetail />} />
+            <Route path="/properties/new" element={<PropertyForm />} />
+            <Route path="/properties/:id/edit" element={<PropertyForm />} />
+            <Route path="/permissions" element={<PermissionList />} />
+            <Route path="/permissions/:id" element={<PermissionDetail />} />
+            <Route path="/permissions/new" element={<PermissionForm />} />
+            <Route path="/permissions/:id/edit" element={<PermissionForm />} />
+            <Route path="/leases" element={<LeaseList />} />
+            <Route path="/leases/:id" element={<LeaseDetail />} />
+            <Route path="/leases/new" element={<LeaseForm />} />
+            <Route path="/leases/:id/edit" element={<LeaseForm />} />
+          </Route>
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </BrowserRouter>
