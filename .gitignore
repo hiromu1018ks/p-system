@@ -36,5 +36,8 @@ backend/test_zaisan.db
 # Claude Code
 .claude/
 
+# Git worktrees
+.worktrees/
+
 # Alembic auto-generated
 backend/alembic/README
