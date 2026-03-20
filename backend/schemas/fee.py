@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class FeeCalculateRequest(BaseModel):
@@ -109,6 +109,14 @@ class UnitPriceUpdate(BaseModel):
     unit_price: int | None = None
     usage: str | None = None
     end_date: date | None = None
+
+
+class BulkFeeUpdateRequest(BaseModel):
+    lease_ids: list[int] = Field(..., min_length=1, max_length=100)
+    new_unit_price: int = Field(..., gt=0)
+    discount_rate: float = Field(default=0.0, ge=0.0, le=1.0)
+    tax_rate: float = Field(default=0.10, ge=0.0, le=1.0)
+    discount_reason: str | None = None
 
 
 class UnitPriceResponse(BaseModel):

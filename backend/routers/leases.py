@@ -5,19 +5,23 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from auth import get_current_user, require_role
+from audit import log_audit
 from models.user import User
 from models.property import Property
 from models.lease import Lease
+from models.fee_detail import FeeDetail
 from schemas.lease import (
     LeaseCreate, LeaseUpdate, LeaseResponse,
     LeaseListItem, LeaseHistoryResponse,
     LeaseStatusChangeRequest, LeaseRenewalRequest,
 )
+from schemas.fee import BulkFeeUpdateRequest
 from services.lease_service import (
     create_lease, update_lease, delete_lease,
     list_leases, get_lease_history,
     change_status, start_renewal,
 )
+from services.fee_calculator import calculate_fee
 
 router = APIRouter(prefix="/api/leases", tags=["leases"])
 
@@ -68,6 +72,169 @@ def post_lease(
         ip_address=request.client.host if request.client else None,
     )
     return {"data": lease, "message": "貸付案件を登録しました"}
+
+
+@router.post("/bulk-preview")
+def bulk_fee_preview(
+    body: BulkFeeUpdateRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """一括料金更新のプレビュー（管理者のみ）"""
+    require_role(current_user, ["admin"])
+
+    leases = db.query(Lease).filter(
+        Lease.id.in_(body.lease_ids),
+        Lease.is_deleted == False,
+    ).all()
+
+    if len(leases) != len(body.lease_ids):
+        raise HTTPException(status_code=404, detail={
+            "code": "NOT_FOUND", "message": "一部の貸付案件が見つかりません",
+        })
+
+    non_active = [l for l in leases if l.status != "active"]
+    if non_active:
+        raise HTTPException(status_code=400, detail={
+            "code": "INVALID_STATUS",
+            "message": f"アクティブでない案件が含まれています（ID: {[l.id for l in non_active]}）",
+        })
+
+    items = []
+    for lease in leases:
+        prop = db.query(Property).filter(Property.id == lease.property_id).first()
+        area_sqm = float(prop.area_sqm) if prop and prop.area_sqm else 0.0
+        fee = calculate_fee(
+            unit_price=body.new_unit_price,
+            area_sqm=area_sqm,
+            start_date=lease.start_date,
+            end_date=lease.end_date,
+            discount_rate=body.discount_rate,
+            tax_rate=body.tax_rate,
+        )
+        items.append({
+            "lease_id": lease.id,
+            "lease_number": lease.lease_number,
+            "lessee_name": lease.lessee_name,
+            "property_name": prop.name if prop else None,
+            "current_annual_rent": lease.annual_rent,
+            "new_total_amount": fee["total_amount"],
+        })
+
+    return {"data": {"items": items}, "message": "OK"}
+
+
+@router.post("/bulk-update-fee")
+def bulk_fee_update(
+    body: BulkFeeUpdateRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """一括料金更新（管理者のみ）"""
+    require_role(current_user, ["admin"])
+
+    if len(body.lease_ids) > 100:
+        raise HTTPException(status_code=400, detail={
+            "code": "TOO_MANY_LEASES",
+            "message": "一度に更新できるのは100件までです",
+        })
+
+    leases = db.query(Lease).filter(
+        Lease.id.in_(body.lease_ids),
+        Lease.is_deleted == False,
+    ).all()
+
+    if len(leases) != len(body.lease_ids):
+        raise HTTPException(status_code=404, detail={
+            "code": "NOT_FOUND", "message": "一部の貸付案件が見つかりません",
+        })
+
+    non_active = [l for l in leases if l.status != "active"]
+    if non_active:
+        raise HTTPException(status_code=400, detail={
+            "code": "INVALID_STATUS",
+            "message": f"アクティブでない案件が含まれています（ID: {[l.id for l in non_active]}）",
+        })
+
+    ip_address = request.client.host if request.client else None
+    updated_count = 0
+
+    try:
+        for lease in leases:
+            prop = db.query(Property).filter(Property.id == lease.property_id).first()
+            area_sqm = float(prop.area_sqm) if prop and prop.area_sqm else 0.0
+
+            # 古いFeeDetailのis_latestをFalseにする
+            old_fees = db.query(FeeDetail).filter(
+                FeeDetail.case_id == lease.id,
+                FeeDetail.case_type == "lease",
+                FeeDetail.is_latest == True,
+            ).all()
+            for old_fee in old_fees:
+                old_fee.is_latest = False
+
+            # 新しい料金を計算
+            fee = calculate_fee(
+                unit_price=body.new_unit_price,
+                area_sqm=area_sqm,
+                start_date=lease.start_date,
+                end_date=lease.end_date,
+                discount_rate=body.discount_rate,
+                tax_rate=body.tax_rate,
+            )
+
+            # 新しいFeeDetailを作成
+            new_fee = FeeDetail(
+                case_id=lease.id,
+                case_type="lease",
+                is_latest=True,
+                unit_price=fee["unit_price"],
+                area_sqm=fee["area_sqm"],
+                start_date=lease.start_date,
+                end_date=lease.end_date,
+                months=fee["months"],
+                fraction_days=fee["fraction_days"],
+                base_amount=fee["base_amount"],
+                fraction_amount=fee["fraction_amount"],
+                subtotal=fee["subtotal"],
+                discount_rate=fee["discount_rate"],
+                discount_reason=body.discount_reason,
+                discounted_amount=fee["discounted_amount"],
+                tax_rate=fee["tax_rate"],
+                tax_amount=fee["tax_amount"],
+                total_amount=fee["total_amount"],
+                calculated_by=current_user.id,
+                formula_version=fee["formula_version"],
+            )
+            db.add(new_fee)
+
+            # 貸付の年間賃貸料を更新
+            old_annual_rent = lease.annual_rent
+            lease.annual_rent = fee["total_amount"]
+
+            # 監査ログ
+            log_audit(
+                db=db,
+                user_id=current_user.id,
+                action="bulk_fee_update",
+                target_table="t_lease",
+                target_id=lease.id,
+                changed_fields=["annual_rent"],
+                before_value={"annual_rent": old_annual_rent},
+                after_value={"annual_rent": fee["total_amount"]},
+                ip_address=ip_address,
+            )
+
+            updated_count += 1
+
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    return {"data": {"updated_count": updated_count}, "message": "一括料金更新が完了しました"}
 
 
 @router.get("/{lease_id}")
