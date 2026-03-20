@@ -14,6 +14,7 @@ from models.unit_price import UnitPrice  # ensure table is created
 from models.jwt_blacklist import JWTBlacklist  # ensure table is created
 from models.lease import Lease  # ensure table is created
 from models.lease_history import LeaseHistory  # ensure table is created
+from models.document import Document  # ensure table is created
 from auth import hash_password, create_access_token
 
 
