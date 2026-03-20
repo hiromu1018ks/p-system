@@ -1,3 +1,6 @@
+from datetime import date, datetime
+from decimal import Decimal
+
 from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -11,7 +14,23 @@ from routers.fees import router as fees_router
 from auth import get_current_user, require_role
 from models.user import User
 
-app = FastAPI(title="自治体財産管理システム", version="0.1.0")
+class CustomJSONResponse(JSONResponse):
+    def render(self, content) -> bytes:
+        import json
+        def default(obj):
+            if isinstance(obj, (date, datetime)):
+                return obj.isoformat()
+            if isinstance(obj, Decimal):
+                return float(obj)
+            raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
+        return json.dumps(content, default=default, ensure_ascii=False).encode("utf-8")
+
+
+app = FastAPI(
+    title="自治体財産管理システム",
+    version="0.1.0",
+    default_response_class=CustomJSONResponse,
+)
 
 app.add_middleware(
     CORSMiddleware,
