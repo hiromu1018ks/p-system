@@ -73,3 +73,17 @@ export async function exportLeases(status) {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+export function bulkPreviewFee(data) {
+  return apiClient('/api/leases/bulk-preview', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export function bulkUpdateFee(data) {
+  return apiClient('/api/leases/bulk-update-fee', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}

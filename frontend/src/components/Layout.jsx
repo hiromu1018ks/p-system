@@ -45,6 +45,12 @@ export default function Layout() {
               >
                 マスタ管理
               </button>
+              <button
+                className={`sidebar-link ${isActive('/bulk-fee-update') ? 'active' : ''}`}
+                onClick={() => navigate('/bulk-fee-update')}
+              >
+                一括賃料改定
+              </button>
             </>
           )}
         </nav>

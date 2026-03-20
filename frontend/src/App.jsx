@@ -12,6 +12,7 @@ import LeaseList from './pages/LeaseList'
 import LeaseDetail from './pages/LeaseDetail'
 import LeaseForm from './pages/LeaseForm'
 import MasterAdmin from './pages/MasterAdmin'
+import BulkFeeUpdate from './pages/BulkFeeUpdate'
 import ProtectedRoute from './components/ProtectedRoute'
 import Layout from './components/Layout'
 import './App.css'
@@ -37,6 +38,7 @@ function App() {
             <Route path="/leases/new" element={<LeaseForm />} />
             <Route path="/leases/:id/edit" element={<LeaseForm />} />
             <Route path="/master-admin" element={<MasterAdmin />} />
+            <Route path="/bulk-fee-update" element={<BulkFeeUpdate />} />
           </Route>
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
