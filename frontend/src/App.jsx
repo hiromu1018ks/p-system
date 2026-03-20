@@ -5,6 +5,9 @@ import DashboardPlaceholder from './pages/DashboardPlaceholder'
 import PropertyList from './pages/PropertyList'
 import PropertyDetail from './pages/PropertyDetail'
 import PropertyForm from './pages/PropertyForm'
+import PermissionList from './pages/PermissionList'
+import PermissionDetail from './pages/PermissionDetail'
+import PermissionForm from './pages/PermissionForm'
 import ProtectedRoute from './components/ProtectedRoute'
 import './App.css'
 
@@ -53,6 +56,22 @@ function App() {
                 <PropertyForm />
               </ProtectedRoute>
             }
+          />
+          <Route
+            path="/permissions"
+            element={<ProtectedRoute><PermissionList /></ProtectedRoute>}
+          />
+          <Route
+            path="/permissions/:id"
+            element={<ProtectedRoute><PermissionDetail /></ProtectedRoute>}
+          />
+          <Route
+            path="/permissions/new"
+            element={<ProtectedRoute><PermissionForm /></ProtectedRoute>}
+          />
+          <Route
+            path="/permissions/:id/edit"
+            element={<ProtectedRoute><PermissionForm /></ProtectedRoute>}
           />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
