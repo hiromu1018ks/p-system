@@ -12,6 +12,8 @@ from models.permission_history import PermissionHistory  # ensure table is creat
 from models.fee_detail import FeeDetail  # ensure table is created
 from models.unit_price import UnitPrice  # ensure table is created
 from models.jwt_blacklist import JWTBlacklist  # ensure table is created
+from models.lease import Lease  # ensure table is created
+from models.lease_history import LeaseHistory  # ensure table is created
 from auth import hash_password, create_access_token
 
 
