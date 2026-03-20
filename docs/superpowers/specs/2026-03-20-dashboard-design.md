@@ -12,14 +12,14 @@ Replace the current `DashboardPlaceholder.jsx` with a fully functional dashboard
 
 | Card | Value | Filter | Color |
 |------|-------|--------|-------|
-| 使用許可案件中 | Count of active permissions | `t_permission` WHERE `is_deleted=false` AND `status IN (approved, issued, active)` AND `is_latest_case=true` | Blue (#2b6cb0) |
-| 貸付案件中 | Count of active leases | `t_lease` WHERE `is_deleted=false` AND `status IN (active)` AND `is_latest_case=true` | Blue (#2b6cb0) |
-| 期限切れ間近 | Cases expiring within 30 days | Both tables WHERE `end_date` between today and today+30 days, `is_latest_case=true`, not expired/cancelled/terminated | Red (#e53e3e) |
+| 使用許可案件中 | Count of in-progress permissions | `t_permission` WHERE `is_deleted=false` AND `status IN (draft, submitted, under_review, pending_approval, approved, issued)` AND `is_latest_case=true` | Blue (#2b6cb0) |
+| 貸付案件中 | Count of in-progress leases | `t_lease` WHERE `is_deleted=false` AND `status IN (draft, negotiating, pending_approval, active)` AND `is_latest_case=true` | Blue (#2b6cb0) |
+| 期限切れ間近 | Cases expiring within 30 days | Both tables WHERE `end_date` between today and today+30 days, `is_latest_case=true`. Permissions: exclude `expired`, `cancelled`, `rejected`. Leases: exclude `expired`, `terminated` | Red (#e53e3e) |
 | 今月新規 | Cases created this month | Both tables WHERE `created_at` in current month, `is_latest_case=true` | Green (#38a169) |
 
 ### FY Total + Quick Links (second row)
 
-- **Left:** Current fiscal year total (April 1 to present). FY starts April 1 (Japanese fiscal year). Display as "R{FY}年度" format.
+- **Left:** Count of new registrations created within the current fiscal year (April 1 to present), both permissions and leases, `is_latest_case=true`, `is_deleted=false`. Display as "R{FY}年度" format.
 - **Right:** 3 navigation buttons linking to Property List, Permission List, Lease List. Blue (#2b6cb0) background, white text.
 
 ### Status Distribution Chart (third row, left)
@@ -34,14 +34,16 @@ Replace the current `DashboardPlaceholder.jsx` with a fully functional dashboard
 ### Expiry Alerts (third row, right)
 
 - List all cases where `end_date` is within 30 days from today
-- Both permissions and leases, `is_latest_case=true`, excluding expired/cancelled/terminated statuses
+- Both permissions and leases, `is_latest_case=true`
+- **Permissions:** exclude `expired`, `cancelled`, `rejected`
+- **Leases:** exclude `expired`, `terminated`
 - Sorted by remaining days ascending (most urgent first)
 - **Color coding by urgency:**
   - Red (#e53e3e) + red left border: 0-7 days remaining
   - Orange (#ed8936) + orange left border: 8-15 days remaining
   - Yellow (#d69e2e) + yellow left border: 16-30 days remaining
 - Each item shows: case number, applicant/lessee name, property name, remaining days
-- Clicking an item navigates to the case detail page
+- Clicking navigates to `/permissions/{id}` or `/leases/{id}` based on `case_type`
 
 ### Recent Audit Logs (bottom, full width)
 
@@ -49,8 +51,7 @@ Replace the current `DashboardPlaceholder.jsx` with a fully functional dashboard
 - Columns: 日時 (performed_at), 操作者 (user from m_user), 操作 (action), 対象 (target_table + target_id)
 - **Action badge colors:**
   - CREATE → green badge
-  - UPDATE → blue badge
-  - STATUS_CHANGE → yellow badge
+  - UPDATE → blue badge (covers both field updates and status transitions)
   - DELETE → red badge
   - PDF_GEN → purple badge
 
@@ -99,7 +100,7 @@ Single endpoint returning all dashboard data in one response. Avoids multiple ro
         "action": "CREATE",
         "target_table": "t_permission",
         "target_id": 15,
-        "summary": "使用許可 R06-使-015"
+        "summary": "使用許可 R06-使-015"  // derived: join target_table+target_id to get case number, format as "{type_label} {number}"
       }
     ]
   }
@@ -108,6 +109,8 @@ Single endpoint returning all dashboard data in one response. Avoids multiple ro
 
 **Router file:** `backend/routers/dashboard.py`
 **Service:** Query logic inline in router (simple aggregation queries, no need for separate service file)
+
+**`summary` field derivation (recent_logs):** Join `t_audit_log` to `m_user` for `display_name`. For `target_table` = `t_permission`, join to get `permission_number`; for `t_lease`, join to get `lease_number`; for `m_property`, join to get `property_code`. Format: `"{table_label} {identifier}"`.
 
 ## Frontend
 
@@ -159,3 +162,4 @@ Japanese fiscal year: April 1 to March 31.
 - **Zero expiry alerts:** Show the alerts section with a green "期限切れ間近の案件はありません" message
 - **Multiple users with same name:** Display `user_name` from `m_user.display_name`, joined with user_id if needed
 - **is_latest_case filter:** All dashboard counts only consider the latest case in renewal chains to avoid double-counting
+- **Loading state:** Show "読み込み中..." text in each section while the API call is in progress. No skeleton placeholders needed for this scale.
