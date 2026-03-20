@@ -55,6 +55,14 @@ async def upload_file(
                 status_code=404,
                 detail={"code": "PERMISSION_NOT_FOUND", "message": "関連する使用許可案件が見つかりません"},
             )
+    elif related_type == "lease":
+        from models.lease import Lease
+        entity = db.query(Lease).filter(Lease.id == related_id).first()
+        if not entity:
+            raise HTTPException(
+                status_code=404,
+                detail={"code": "LEASE_NOT_FOUND", "message": "関連する貸付案件が見つかりません"},
+            )
 
     # 保存ディレクトリ作成
     save_dir = os.path.join(UPLOAD_DIR, related_type, str(related_id), file_type)

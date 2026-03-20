@@ -7,6 +7,7 @@ from database import get_db
 from auth import get_current_user, require_role
 from models.user import User
 from models.permission import Permission
+from models.lease import Lease
 from models.fee_detail import FeeDetail
 from models.unit_price import UnitPrice
 from schemas.fee import (
@@ -51,9 +52,11 @@ def post_calculate_fee(
     # 案件の存在チェック
     if body.case_type == "permission":
         case = db.query(Permission).filter(Permission.id == body.case_id).first()
+    elif body.case_type == "lease":
+        case = db.query(Lease).filter(Lease.id == body.case_id).first()
     else:
         raise HTTPException(status_code=400, detail={
-            "code": "INVALID_CASE_TYPE", "message": "lease は未対応です",
+            "code": "INVALID_CASE_TYPE", "message": "無効な案件種別です",
         })
     if not case:
         raise HTTPException(status_code=404, detail={
@@ -116,6 +119,9 @@ def post_calculate_fee(
     # 案件の fee_amount を更新（override_flag が OFF の場合）
     if body.case_type == "permission" and not case.override_flag:
         case.fee_amount = fee.total_amount
+        db.commit()
+    elif body.case_type == "lease" and not case.override_flag:
+        case.annual_rent = fee.total_amount
         db.commit()
 
     return {"data": _orm_to_dict(fee), "message": "料金を計算しました"}
