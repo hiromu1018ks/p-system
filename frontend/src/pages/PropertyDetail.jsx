@@ -121,7 +121,7 @@ export default function PropertyDetail() {
       )}
 
       {activeTab === 'files' && (
-        <FileList relatedType="property" relatedId={parseInt(id)} />
+        <FileList relatedType="property" relatedId={parseInt(id)} showUpload />
       )}
 
       {activeTab === 'history' && (

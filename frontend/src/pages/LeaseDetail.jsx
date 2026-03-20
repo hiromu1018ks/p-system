@@ -240,7 +240,7 @@ export default function LeaseDetail() {
       )}
 
       {activeTab === 'files' && (
-        <FileList relatedType="lease" relatedId={parseInt(id)} />
+        <FileList relatedType="lease" relatedId={parseInt(id)} showUpload />
       )}
 
       {activeTab === 'history' && (

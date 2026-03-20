@@ -230,7 +230,7 @@ export default function PermissionDetail() {
       )}
 
       {activeTab === 'files' && (
-        <FileList relatedType="permission" relatedId={parseInt(id)} />
+        <FileList relatedType="permission" relatedId={parseInt(id)} showUpload />
       )}
 
       {activeTab === 'history' && (
