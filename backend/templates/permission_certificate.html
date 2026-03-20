@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head><meta charset="UTF-8"></head>
+<body>
+<h1>使 用 許 可 証</h1>
+
+<table>
+  <tr><th style="width:30%">許可番号</th><td>{{ permission_number }}</td></tr>
+  <tr><th>許可年月日</th><td>{{ permission_date | format_date }}</td></tr>
+</table>
+
+<h2>1. 申請者</h2>
+<table>
+  <tr><th>氏名・法人名</th><td>{{ applicant_name }}</td></tr>
+  <tr><th>住所</th><td>{{ applicant_address }}</td></tr>
+</table>
+
+<h2>2. 対象財産</h2>
+<table>
+  <tr><th>財産名称</th><td>{{ property_name }}</td></tr>
+  <tr><th>所在地</th><td>{{ property_address }}</td></tr>
+</table>
+
+<h2>3. 使用許可内容</h2>
+<table>
+  <tr><th>使用目的</th><td>{{ purpose }}</td></tr>
+  <tr><th>使用期間</th><td>{{ start_date | format_date }} 〜 {{ end_date | format_date }}</td></tr>
+  <tr><th>使用面積</th><td class="right">{{ usage_area_sqm }} ㎡</td></tr>
+</table>
+
+<h2>4. 使用料</h2>
+<table>
+  <tr><th>使用料</th><td class="right">{{ fee_amount | format_amount }}</td></tr>
+</table>
+
+<h2>5. 許可条件</h2>
+<p>{{ conditions or "特になし" }}</p>
+
+<div class="stamp-area">
+  <p>自治体長 印</p>
+</div>
+
+<div class="footer">
+  本許可は地方自治法第238条の4に基づき許可するものです。
+</div>
+</body>
+</html>

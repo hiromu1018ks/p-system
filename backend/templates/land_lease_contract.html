@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head><meta charset="UTF-8"></head>
+<body>
+<h1>土地 貸付 契約書</h1>
+
+<table>
+  <tr><th style="width:30%">契約番号</th><td>{{ lease_number }}</td></tr>
+  <tr><th>決裁年月日</th><td>{{ approval_date | format_date }}</td></tr>
+</table>
+
+<h2>第一条 目的</h2>
+<p>甲は乙に対し、下記物件を {{ purpose }}するため賃貸借するものとし、乙はこれを賃借する。</p>
+
+<h2>第二条 物件の表示</h2>
+<table>
+  <tr><th>財産名称</th><td>{{ property_name }}</td></tr>
+  <tr><th>所在地</th><td>{{ property_address }}</td></tr>
+  <tr><th>地番</th><td>{{ property_lot_number }}</td></tr>
+  <tr><th>面積</th><td class="right">{{ property_area }} ㎡</td></tr>
+</table>
+
+<h2>第三条 賃貸借期間</h2>
+<p>{{ start_date | format_date }} から {{ end_date | format_date }} までとする。</p>
+
+<h2>第四条 賃料</h2>
+<table>
+  <tr><th>年間賃料</th><td class="right">{{ annual_rent | format_amount }}</td></tr>
+  <tr><th>支払方法</th>
+    <td>{% if payment_method == 'monthly' %}月払{% elif payment_method == 'semiannual' %}半期払{% else %}年払{% endif %}</td>
+  </tr>
+</table>
+
+<h2>第五条 特約事項</h2>
+<p>1. 本物件の目的外使用は禁ずる。</p>
+<p>2. 借受人は事前に甲の承認を得ることなく、本契約上の権利を第三者に譲渡しできない。</p>
+
+<h2>第六条 解約</h2>
+<p>甲または乙は、3ヶ月前までに書面により通知することで本契約を解約することができる。</p>
+
+<div class="stamp-area">
+  <table style="width: 100%">
+    <tr>
+      <td style="width: 50%; border: none; text-align: center;">
+        <p>甲（自治体長 印）</p>
+      </td>
+      <td style="width: 50%; border: none; text-align: center;">
+        <p>乙（借受者 印）</p>
+        <p>住所：{{ lessee_address }}</p>
+        <p>氏名：{{ lessee_name }}</p>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<div class="footer">
+  本契約は地方自治法第238条の5に基づく。
+</div>
+</body>
+</html>

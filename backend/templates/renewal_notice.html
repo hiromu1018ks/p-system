@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head><meta charset="UTF-8"></head>
+<body>
+<h1>更新のご案内</h1>
+
+<p>{{ applicant_name }} 様</p>
+<p>住所：{{ applicant_address }}</p>
+
+<p>
+  {% if case_type == "permission" %}使用許可{% else %}貸付契約{% endif %}（{{ case_number }}）につきまして、
+  現在の有効期限が {{ current_end_date | format_date }} となっております。
+</p>
+
+<p>つきましては、更新手続きのお願いを申し上げます。</p>
+
+<h2>更新後の条件（案）</h2>
+<table>
+  <tr><th>新期間</th><td>{{ new_start_date | format_date }} 〜 {{ new_end_date | format_date }}</td></tr>
+  {% if new_fee %}
+  <tr><th>新{% if case_type == "permission" %}使用料{% else %}賃料{% endif %}</th><td class="right">{{ new_fee | format_amount }}</td></tr>
+  {% endif %}
+</table>
+
+<h2>お手続き</h2>
+<p>更新をご希望される場合は、以下の手続きをお願いいたします。</p>
+<ol>
+  <li>本状に添付の更新申請書に必要事項をご記入の上、署名・押印してください。</li>
+  <li><strong>更新期限：{{ renewal_deadline | format_date }}まで</strong></li>
+  <li>郵送先：自治体 財産管理担当</li>
+</ol>
+
+<p>期限までにご提出いただけない場合、現行の{% if case_type == "permission" %}使用許可{% else %}貸付契約{% endif %}は有効期限をもって終了いたしますので、あらかじめご了承ください。</p>
+
+<div class="footer">
+  ご不明な点がございましたら、財産管理担当までお問い合わせください。
+</div>
+</body>
+</html>
