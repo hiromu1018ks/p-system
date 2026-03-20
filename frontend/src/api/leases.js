@@ -1,4 +1,4 @@
-import { apiClient } from './client'
+import { apiClient, getToken } from './client'
 
 export async function getLeases(params = {}) {
   const query = new URLSearchParams()
@@ -56,4 +56,20 @@ export async function startLeaseRenewal(id, reason = '') {
 export async function getLeaseHistory(id) {
   const data = await apiClient(`/api/leases/${id}/history`)
   return data.data
+}
+
+export async function exportLeases(status) {
+  const params = status ? `?status=${status}` : '';
+  const token = getToken();
+  const res = await fetch(`/api/export/leases${params}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error('エクスポートに失敗しました');
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '貸付案件.csv';
+  a.click();
+  URL.revokeObjectURL(url);
 }

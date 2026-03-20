@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getLeases } from '../api/leases'
+import { getLeases, exportLeases } from '../api/leases'
 import StatusBadge from '../components/StatusBadge'
 
 const SUB_TYPE_LABELS = { land: '土地', building: '建物' }
@@ -12,6 +12,7 @@ export default function LeaseList() {
   const [statusFilter, setStatusFilter] = useState('')
   const [q, setQ] = useState('')
   const [loading, setLoading] = useState(true)
+  const [exporting, setExporting] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => { load() }, [page, statusFilter])
@@ -30,13 +31,27 @@ export default function LeaseList() {
   }
 
   const handleSearch = (e) => { e.preventDefault(); setPage(1); load() }
+
+  const handleExport = async () => {
+    setExporting(true)
+    try {
+      await exportLeases(statusFilter)
+    } catch (err) {
+      alert(err.message)
+    } finally {
+      setExporting(false)
+    }
+  }
   const totalPages = Math.ceil(total / 20)
 
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <h2>貸付案件一覧</h2>
-        <button onClick={() => navigate('/leases/new')}>新規登録</button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={handleExport} disabled={exporting}>{exporting ? 'エクスポート中...' : 'CSVエクスポート'}</button>
+          <button onClick={() => navigate('/leases/new')}>新規登録</button>
+        </div>
       </div>
 
       <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, marginBottom: 16 }}>

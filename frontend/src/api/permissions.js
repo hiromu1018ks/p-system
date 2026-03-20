@@ -1,4 +1,4 @@
-import { apiClient } from './client'
+import { apiClient, getToken } from './client'
 
 export async function getPermissions(params = {}) {
   const query = new URLSearchParams()
@@ -56,4 +56,20 @@ export async function startRenewal(id, reason = '') {
 export async function getPermissionHistory(id) {
   const data = await apiClient(`/api/permissions/${id}/history`)
   return data.data
+}
+
+export async function exportPermissions(status) {
+  const params = status ? `?status=${status}` : '';
+  const token = getToken();
+  const res = await fetch(`/api/export/permissions${params}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error('エクスポートに失敗しました');
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '使用許可案件.csv';
+  a.click();
+  URL.revokeObjectURL(url);
 }
