@@ -11,6 +11,7 @@ import PermissionForm from './pages/PermissionForm'
 import LeaseList from './pages/LeaseList'
 import LeaseDetail from './pages/LeaseDetail'
 import LeaseForm from './pages/LeaseForm'
+import MasterAdmin from './pages/MasterAdmin'
 import ProtectedRoute from './components/ProtectedRoute'
 import Layout from './components/Layout'
 import './App.css'
@@ -35,6 +36,7 @@ function App() {
             <Route path="/leases/:id" element={<LeaseDetail />} />
             <Route path="/leases/new" element={<LeaseForm />} />
             <Route path="/leases/:id/edit" element={<LeaseForm />} />
+            <Route path="/master-admin" element={<MasterAdmin />} />
           </Route>
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>

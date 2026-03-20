@@ -36,6 +36,17 @@ export default function Layout() {
               {item.label}
             </button>
           ))}
+          {user?.role === 'admin' && (
+            <>
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.15)', margin: '8px 0' }} />
+              <button
+                className={`sidebar-link ${isActive('/master-admin') ? 'active' : ''}`}
+                onClick={() => navigate('/master-admin')}
+              >
+                マスタ管理
+              </button>
+            </>
+          )}
         </nav>
         <div className="sidebar-footer">
           <div className="sidebar-user">
