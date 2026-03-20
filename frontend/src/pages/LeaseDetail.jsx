@@ -7,6 +7,7 @@ import StatusTransitionButton from '../components/StatusTransitionButton'
 import FeeCalculator from '../components/FeeCalculator'
 import HistoryList from '../components/HistoryList'
 import FileList from '../components/FileList'
+import { generateLandLeasePdf, generateBuildingLeasePdf, generateRenewalPdf, downloadPdf, getDocumentHistory } from '../api/pdf'
 
 const SUB_TYPE_LABELS = { land: '土地', building: '建物' }
 const PAYMENT_LABELS = { monthly: '月払', semiannual: '半期払', annual: '年払' }
@@ -146,6 +147,7 @@ export default function LeaseDetail() {
       </div>
 
       {activeTab === 'basic' && (
+        <>
         <table style={{ width: '100%' }}>
           <tbody>
             {[
@@ -170,6 +172,65 @@ export default function LeaseDetail() {
             ))}
           </tbody>
         </table>
+
+          {/* PDF出力ボタン */}
+          <div style={{ marginTop: 16 }}>
+            <h3 style={{ fontSize: 14, marginBottom: 8 }}>帳票出力</h3>
+            {['active', 'expired'].includes(lease.status) && (
+              <>
+                <button
+                  onClick={async () => {
+                    try {
+                      const result = await generateLandLeasePdf(lease.id)
+                      await downloadPdf(result.id)
+                    } catch (err) { alert(err.message) }
+                  }}
+                  style={{ marginRight: 8, padding: '6px 16px', fontSize: 13 }}
+                >
+                  土地貸付契約書を生成
+                </button>
+                {lease.property_sub_type === 'building' && (
+                  <button
+                    onClick={async () => {
+                      try {
+                        const result = await generateBuildingLeasePdf(lease.id)
+                        await downloadPdf(result.id)
+                      } catch (err) { alert(err.message) }
+                    }}
+                    style={{ marginRight: 8, padding: '6px 16px', fontSize: 13 }}
+                  >
+                    建物貸付契約書を生成
+                  </button>
+                )}
+              </>
+            )}
+            {['active', 'expired'].includes(lease.status) && (
+              <button
+                onClick={async () => {
+                  try {
+                    const result = await generateRenewalPdf('lease', lease.id)
+                    await downloadPdf(result.id)
+                  } catch (err) { alert(err.message) }
+                }}
+                style={{ marginRight: 8, padding: '6px 16px', fontSize: 13 }}
+              >
+                更新通知文を生成
+              </button>
+            )}
+            <button
+              onClick={async () => {
+                try {
+                  const history = await getDocumentHistory('lease', lease.id)
+                  if (history.length === 0) { alert('生成履歴がありません'); return }
+                  await downloadPdf(history[0].id)
+                } catch (err) { alert(err.message) }
+              }}
+              style={{ padding: '6px 16px', fontSize: 13, background: '#edf2f7', color: '#4a5568' }}
+            >
+              直近のPDFをダウンロード
+            </button>
+          </div>
+        </>
       )}
 
       {activeTab === 'fee' && (

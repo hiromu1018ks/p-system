@@ -7,6 +7,7 @@ import StatusTransitionButton from '../components/StatusTransitionButton'
 import FeeCalculator from '../components/FeeCalculator'
 import HistoryList from '../components/HistoryList'
 import FileList from '../components/FileList'
+import { generatePermissionPdf, generateRenewalPdf, downloadPdf, getDocumentHistory } from '../api/pdf'
 
 export default function PermissionDetail() {
   const { id } = useParams()
@@ -152,6 +153,7 @@ export default function PermissionDetail() {
       </div>
 
       {activeTab === 'basic' && (
+        <>
         <table style={{ width: '100%' }}>
           <tbody>
             {[
@@ -175,6 +177,50 @@ export default function PermissionDetail() {
             ))}
           </tbody>
         </table>
+
+        {/* PDF出力ボタン */}
+        <div style={{ marginTop: 16 }}>
+          <h3 style={{ fontSize: 14, marginBottom: 8 }}>帳票出力</h3>
+          {(['approved', 'issued', 'expired'].includes(permission.status)) && (
+            <button
+              onClick={async () => {
+                try {
+                  const result = await generatePermissionPdf(permission.id)
+                  await downloadPdf(result.id)
+                } catch (err) { alert(err.message) }
+              }}
+              style={{ marginRight: 8, padding: '6px 16px', fontSize: 13 }}
+            >
+              使用許可証を生成
+            </button>
+          )}
+          {['approved', 'issued', 'expired'].includes(permission.status) && (
+            <button
+              onClick={async () => {
+                try {
+                  const result = await generateRenewalPdf('permission', permission.id)
+                  await downloadPdf(result.id)
+                } catch (err) { alert(err.message) }
+              }}
+              style={{ marginRight: 8, padding: '6px 16px', fontSize: 13 }}
+            >
+              更新通知文を生成
+            </button>
+          )}
+          <button
+            onClick={async () => {
+              try {
+                const history = await getDocumentHistory('permission', permission.id)
+                if (history.length === 0) { alert('生成履歴がありません'); return }
+                await downloadPdf(history[0].id)
+              } catch (err) { alert(err.message) }
+            }}
+            style={{ padding: '6px 16px', fontSize: 13, background: '#edf2f7', color: '#4a5568' }}
+          >
+            直近のPDFをダウンロード
+          </button>
+        </div>
+      </>
       )}
 
       {activeTab === 'fee' && (
