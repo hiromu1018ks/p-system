@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import Login from './pages/Login'
-import DashboardPlaceholder from './pages/DashboardPlaceholder'
+import Dashboard from './pages/Dashboard'
 import PropertyList from './pages/PropertyList'
 import PropertyDetail from './pages/PropertyDetail'
 import PropertyForm from './pages/PropertyForm'
@@ -24,7 +24,7 @@ function App() {
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <DashboardPlaceholder />
+                <Dashboard />
               </ProtectedRoute>
             }
           />
