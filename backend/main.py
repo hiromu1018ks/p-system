@@ -12,6 +12,7 @@ from routers.files import router as files_router
 from routers.permissions import router as permissions_router
 from routers.fees import router as fees_router
 from routers.leases import router as leases_router
+from routers.pdf import router as pdf_router
 from auth import get_current_user, require_role
 from models.user import User
 
@@ -53,6 +54,7 @@ app.include_router(files_router)
 app.include_router(permissions_router)
 app.include_router(fees_router)
 app.include_router(leases_router)
+app.include_router(pdf_router)
 
 
 @app.exception_handler(RequestValidationError)
